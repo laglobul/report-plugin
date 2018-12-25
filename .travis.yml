@@ -1,0 +1,17 @@
+language: node_js
+
+node_js:
+    - "10"
+
+sudo: false
+
+install:
+    - npm i
+    - npm-install-peers
+
+script:
+    - npm run build
+
+after_success:
+    - npm i -g semantic-release@15 @semantic-release/npm npm-install-peers
+    - npx semantic-release -e @semantic-release/npm
