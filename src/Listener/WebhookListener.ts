@@ -31,12 +31,12 @@ export default class WebhookListener {
             const channel: TextableChannel = this.guild.channels.get(channelId) as TextableChannel;
 
             this.webserver.post('/subscription/' + channelId, async (req, res) => {
-                console.log(req.body);
                 let message: Message;
                 let reportMessage: ReportMessage;
-                const embed = await this.createReportEmbed(req.body.report);
+                const report: interfaces.Report = JSON.parse(req.body.report);
+                const embed                     = await this.createReportEmbed(report);
                 if (req.body.action === 'edit') {
-                    reportMessage = await this.reportMessageRepo.findOne({reportId: req.body.report.id});
+                    reportMessage = await this.reportMessageRepo.findOne({reportId: report.id});
                     if (reportMessage) {
                         message = await channel.getMessage(reportMessage.messageId);
                         if (message) {
@@ -52,7 +52,7 @@ export default class WebhookListener {
                 message = await channel.createMessage({embed: embed.serialize()});
                 if (!reportMessage) {
                     reportMessage            = new ReportMessage();
-                    reportMessage.reportId   = req.body.report.id;
+                    reportMessage.reportId   = report.id;
                     reportMessage.guildId    = this.guild.id;
                     reportMessage.channelId  = channel.id;
                     reportMessage.insertDate = new Date();

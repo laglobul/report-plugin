@@ -5,8 +5,8 @@ export default class ReportMessage extends BaseEntity {
     @PrimaryGeneratedColumn()
     public id: number;
 
-    @Column({type: 'bigint'})
-    public reportId: string;
+    @Column()
+    public reportId: number;
 
     @Column({type: 'bigint'})
     public guildId: string;
