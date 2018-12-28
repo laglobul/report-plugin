@@ -49,6 +49,8 @@ export default class ReportPlugin extends AbstractPlugin {
     private reportCreatorFactory: ReportCreatorFactory;
 
     public async initialize(): Promise<void> {
+
+        // @TODO Move this logic into its own service.
         const reportMessageRepo = this.getRepository<ReportMessage>(ReportMessage);
         const guild = this.client.guilds.get(ReportPlugin.Config.hotlineGuildId);
         for (const url of Object.keys(ReportPlugin.Config.subscriptions)) {
