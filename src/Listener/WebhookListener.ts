@@ -91,7 +91,7 @@ export default class WebhookListener {
 
     private async createReportEmbed(report: interfaces.Report): Promise<Embed> {
         this.logger.info('Creating report embed for: %O', report);
-        
+
         const reportedUsers = report.reportedUsers.map((x) => `<@${x.id}> (${x.id})`);
         const links         = report.links.map((x) => `<${x}>`);
         const tags          = report.tags.map((x) => x.name);
