@@ -4,6 +4,7 @@ import Embed from 'eris-command-framework/Model/Embed';
 import {Express} from 'express';
 import {inject, injectable} from 'inversify';
 import {Connection, Repository} from 'typeorm';
+import {Logger} from 'winston';
 
 import ReportMessage from '../Entity/ReportMessage';
 import ReportPlugin from '../index';
@@ -18,6 +19,7 @@ export default class WebhookListener {
 
     public constructor(
         @inject(Types.webserver) private webserver: Express,
+        @inject(CFTypes.logger) private logger: Logger,
         @inject(CFTypes.connection) private database: Connection,
         @inject(CFTypes.discordClient) private client: Client,
     ) {
@@ -26,6 +28,12 @@ export default class WebhookListener {
 
     public async initialize() {
         this.guild = this.client.guilds.get(ReportPlugin.Config.hotlineGuildId);
+        if (!this.guild) {
+            return this.logger.error(
+                'Failed to initialize WebhookListener. Guild could not be found with the id: %s',
+                ReportPlugin.Config.hotlineGuildId,
+            );
+        }
 
         for (const channelId of ReportPlugin.Config.subscriptions) {
             const channel: TextableChannel = this.guild.channels.get(channelId) as TextableChannel;
