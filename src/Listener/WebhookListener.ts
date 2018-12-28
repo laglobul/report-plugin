@@ -3,6 +3,7 @@ import {types as CFTypes} from 'eris-command-framework';
 import Embed from 'eris-command-framework/Model/Embed';
 import {Express} from 'express';
 import {inject, injectable} from 'inversify';
+import * as moment from 'moment';
 import {Connection, Repository} from 'typeorm';
 import {Logger} from 'winston';
 
@@ -52,9 +53,23 @@ export default class WebhookListener {
                             reportMessage.updateDate = new Date();
                             await reportMessage.save();
 
-                            return res.send(204);
+                            return res.sendStatus(204);
                         }
                     }
+                }
+
+                if (req.body.action === 'delete') {
+                    reportMessage = await this.reportMessageRepo.findOne({reportId: report.id});
+                    if (reportMessage) {
+                        message = await channel.getMessage(reportMessage.messageId);
+                        if (message) {
+                            await message.delete('Deleted Report');
+                            reportMessage.updateDate = new Date();
+                            await reportMessage.save();
+                        }
+                    }
+
+                    return res.sendStatus(204);
                 }
 
                 message = await channel.createMessage({embed: embed.serialize()});
@@ -69,31 +84,37 @@ export default class WebhookListener {
                 reportMessage.messageId = message.id;
                 await reportMessage.save();
 
-                return res.send(204);
+                return res.sendStatus(204);
             });
         }
     }
 
     private async createReportEmbed(report: interfaces.Report): Promise<Embed> {
-        const reporter      = this.client.users.get(report.reporter.id);
         const reportedUsers = report.reportedUsers.map((x) => `<@${x.id}> (${x.id})`);
         const links         = report.links.map((x) => `<${x}>`);
         const tags          = report.tags.map((x) => x.name);
 
+        let description = `**Users:** ${reportedUsers.join(', ')}`;
+        if (report.reason) {
+            description += `\n\n**Reason:** ${report.reason}`;
+        }
+
+        if (report.tags.length > 0) {
+            description += `\n\n**Tags:** ${tags.length === 0 ? 'None' : tags.join(',t')}`;
+        }
+
+        if (report.links.length > 0) {
+            description += `\n\n**Links:** ${links.length === 0 ? 'None' : links.join('\\n')}`;
+        }
+
+        const lastEdit   = moment(report.updateDate).from(moment());
+        const footerText = `Confirmations: ${report.confirmationUsers.length} | Last Edit: ${lastEdit}`;
+
         const embed = new Embed();
 
         embed.author      = {name: `Report ID: ${report.id}`};
-        embed.description = `**Users:** ${reportedUsers.join(', ')}
-        
-**Reason:** ${report.reason}
-
-**Links:** ${links.length === 0 ? 'None' : links.join('\n')}
-
-**Tags:** ${tags.length === 0 ? 'None' : tags.join(',t')}`;
-        embed.footer      = {
-            text: `Reporter: ${reporter.username}#${reporter.discriminator}` +
-                  ` | Confirmations: ${report.confirmationUsers.length}`,
-        };
+        embed.description = description;
+        embed.footer      = {text: footerText};
 
         return embed;
     }

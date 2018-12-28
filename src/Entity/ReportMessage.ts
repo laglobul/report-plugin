@@ -17,6 +17,9 @@ export default class ReportMessage extends BaseEntity {
     @Column({type: 'bigint'})
     public messageId: string;
 
+    @Column({type: 'tinyint', default: false})
+    public deleted: boolean = false;
+
     @Column({type: 'datetime'})
     public insertDate: Date = new Date();
 
