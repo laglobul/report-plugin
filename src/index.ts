@@ -108,7 +108,7 @@ export default class ReportPlugin extends AbstractPlugin {
             // Loop through all the sections
             for (const section of splitContent) {
                 if (/Links:\s+/i.test(section)) {
-                    init.links = section.replace(/Links:\s+/i, '').split(' ');
+                    init.links = section.replace(/Links:\s+/i, '').split(' ').filter((x) => !!x);
                 }
 
                 if (/Reason:\s/.test(section)) {
@@ -116,7 +116,10 @@ export default class ReportPlugin extends AbstractPlugin {
                 }
 
                 if (/Tags:\s/.test(section)) {
-                    init.tags = section.replace(/Tags:\s+/i, '').split(' ').map((x) => parseInt(x, 10));
+                    init.tags = section.replace(/Tags:\s+/i, '')
+                                       .split(' ')
+                                       .map((x) => parseInt(x, 10))
+                                       .filter((x) => !!x);
                 }
             }
         }

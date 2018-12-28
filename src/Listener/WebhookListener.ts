@@ -31,6 +31,7 @@ export default class WebhookListener {
             const channel: TextableChannel = this.guild.channels.get(channelId) as TextableChannel;
 
             this.webserver.post('/subscription/' + channelId, async (req, res) => {
+                console.log(req.body);
                 let message: Message;
                 let reportMessage: ReportMessage;
                 const embed = await this.createReportEmbed(req.body.report);
