@@ -34,7 +34,7 @@ export interface Config {
     apiUrl?: string;
     hotlineGuildId: string;
     reportChannel: string;
-    subscriptions: { [url: string]: string };
+    subscriptions: string[];
 }
 
 export interface Tag {

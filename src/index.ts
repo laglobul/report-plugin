@@ -1,13 +1,13 @@
 import {AxiosInstance, default as axios} from 'axios';
-import {Message, TextableChannel} from 'eris';
 import {AbstractPlugin} from 'eris-command-framework';
 import Decorator from 'eris-command-framework/Decorator';
 import Embed from 'eris-command-framework/Model/Embed';
 import {Express} from 'express';
 import {Container, inject, injectable} from 'inversify';
-import ReportMessage from './Entity/ReportMessage';
 
+import ReportMessage from './Entity/ReportMessage';
 import * as interfaces from './interfaces';
+import WebhookListener from './Listener/WebhookListener';
 import Report from './Model/Report';
 import ReportCreator from './ReportCreator';
 import ReportCreatorFactory from './ReportCreatorFactory';
@@ -31,6 +31,7 @@ export default class ReportPlugin extends AbstractPlugin {
         }));
         container.bind<ReportCreatorFactory>(Types.factory.interactiveReport).to(ReportCreatorFactory);
         container.bind<Express>(Types.webserver).toService(types.webserver);
+        container.bind<WebhookListener>(Types.listener.webhook).to(WebhookListener);
     }
 
     public static getEntities(): any[] {
@@ -42,54 +43,17 @@ export default class ReportPlugin extends AbstractPlugin {
     @inject(Types.api.client)
     private api: AxiosInstance;
 
-    @inject(Types.webserver)
-    private webserver: Express;
+    @inject(Types.listener.webhook)
+    private webhookListener: WebhookListener;
 
     @inject(Types.factory.interactiveReport)
     private reportCreatorFactory: ReportCreatorFactory;
 
     public async initialize(): Promise<void> {
-
-        // @TODO Move this logic into its own service.
-        const reportMessageRepo = this.getRepository<ReportMessage>(ReportMessage);
-        const guild = this.client.guilds.get(ReportPlugin.Config.hotlineGuildId);
-        for (const url of Object.keys(ReportPlugin.Config.subscriptions)) {
-            const channelId = ReportPlugin.Config.subscriptions[url];
-            const channel: TextableChannel = guild.channels.get(channelId) as TextableChannel;
-
-            this.webserver.post('/subscription/' + channelId, async (req, res) => {
-                let message: Message;
-                let reportMessage: ReportMessage;
-                const embed = await this.createReportEmbed(req.body.report);
-                if (req.body.action === 'edit') {
-                    reportMessage = await reportMessageRepo.findOne({reportId: req.body.report.id});
-                    if (reportMessage) {
-                        message = await channel.getMessage(reportMessage.messageId);
-                        if (message) {
-                            await message.edit({embed: embed.serialize()});
-                            reportMessage.updateDate = new Date();
-                            await reportMessage.save();
-
-                            return res.send(204);
-                        }
-                    }
-                }
-
-                message                 = await channel.createMessage({embed: embed.serialize()});
-                if (!reportMessage) {
-                    reportMessage           = new ReportMessage();
-                    reportMessage.reportId  = req.body.report.id;
-                    reportMessage.guildId   = guild.id;
-                    reportMessage.channelId = channel.id;
-                    reportMessage.insertDate = new Date();
-                    reportMessage.updateDate = new Date();
-                }
-                reportMessage.messageId = message.id;
-                await reportMessage.save();
-
-                return res.send(204);
-            });
-        }
+        this.client.once(
+            'ready',
+            () => this.webhookListener.initialize().then(() => this.logger.info('Webhook Listener Initialized')),
+        );
     }
 
     @Decorator.Command('report get', 'Gets a report')

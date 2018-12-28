@@ -6,6 +6,9 @@ const Types = {
     factory:   {
         interactiveReport: Symbol('report.factory.interactiveReport'),
     },
+    listener:  {
+        webhook: Symbol('report.listener.webhook'),
+    },
     webserver: Symbol('webserver'),
 };
 
