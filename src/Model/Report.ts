@@ -12,4 +12,6 @@ export default class Report {
     public tags: number[];
 
     public messageIds: string[];
+
+    public noLinks = false;
 }

@@ -21,6 +21,7 @@
     },
     "peerDependencies": {
         "eris": "^0.9",
+        "express": "^4.16",
         "eris-command-framework": "^2.1"
     },
     "dependencies": {

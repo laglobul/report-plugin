@@ -6,6 +6,13 @@ export interface User {
 export interface Tag {
     id: number;
     name: string;
+    category: TagCategory;
+    insertDate: Date;
+}
+
+export interface TagCategory {
+    id: number;
+    name: string;
     insertDate: Date;
 }
 
@@ -24,5 +31,14 @@ export interface Report {
 }
 
 export interface Config {
+    apiUrl?: string;
     hotlineGuildId: string;
+    reportChannel: string;
+    subscriptions: { [url: string]: string };
+}
+
+export interface Tag {
+    id: number;
+    name: string;
+    insertDAte: Date;
 }
