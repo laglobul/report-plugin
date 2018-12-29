@@ -96,17 +96,17 @@ export default class WebhookListener {
         const links         = report.links.map((x) => `<${x}>`);
         const tags          = report.tags.map((x) => x.name);
 
-        let description = `**Users:** ${reportedUsers.join(', ')}`;
+        let description = `**Users:** \n${reportedUsers.join(', ')}`;
         if (report.reason) {
             description += `\n\n**Reason:** ${report.reason}`;
         }
 
         if (report.tags.length > 0) {
-            description += `\n\n**Tags:** ${tags.length === 0 ? 'None' : tags.join(',t')}`;
+            description += `\n\n**Tags:** \n${tags.join(', ')}`;
         }
 
         if (report.links.length > 0) {
-            description += `\n\n**Links:** ${links.length === 0 ? 'None' : links.join('\\n')}`;
+            description += `\n\n**Links:** \n${links.join('\\n')}`;
         }
 
         const lastEdit   = moment(report.updateDate).from(moment());
