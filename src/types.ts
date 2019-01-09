@@ -7,7 +7,7 @@ const Types = {
         interactiveReport: Symbol('report.factory.interactiveReport'),
     },
     listener:  {
-        webhook: Symbol('report.listener.webhook'),
+        report: Symbol('report.listener.report'),
     },
     webserver: Symbol('webserver'),
 };

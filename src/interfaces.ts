@@ -42,3 +42,8 @@ export interface Tag {
     name: string;
     insertDAte: Date;
 }
+
+export interface ApiReportList {
+    count: number;
+    results: Report[];
+}

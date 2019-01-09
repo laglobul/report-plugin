@@ -1,4 +1,5 @@
 import {AxiosInstance, default as axios} from 'axios';
+import {GuildChannel, TextChannel} from 'eris';
 import {AbstractPlugin} from 'eris-command-framework';
 import Decorator from 'eris-command-framework/Decorator';
 import Embed from 'eris-command-framework/Model/Embed';
@@ -6,8 +7,9 @@ import {Express} from 'express';
 import {Container, inject, injectable} from 'inversify';
 
 import ReportMessage from './Entity/ReportMessage';
+import Subscription from './Entity/Subscription';
 import * as interfaces from './interfaces';
-import WebhookListener from './Listener/WebhookListener';
+import ReportListener from './Listener/ReportListener';
 import Report from './Model/Report';
 import ReportCreator from './ReportCreator';
 import ReportCreatorFactory from './ReportCreatorFactory';
@@ -31,11 +33,11 @@ export default class ReportPlugin extends AbstractPlugin {
         }));
         container.bind<ReportCreatorFactory>(Types.factory.interactiveReport).to(ReportCreatorFactory);
         container.bind<Express>(Types.webserver).toService(types.webserver);
-        container.bind<WebhookListener>(Types.listener.webhook).to(WebhookListener);
+        container.bind<ReportListener>(Types.listener.report).to(ReportListener);
     }
 
     public static getEntities(): any[] {
-        return [ReportMessage];
+        return [ReportMessage, Subscription];
     }
 
     private reportConversations: { [key: string]: ReportCreator } = {};
@@ -43,8 +45,8 @@ export default class ReportPlugin extends AbstractPlugin {
     @inject(Types.api.client)
     private api: AxiosInstance;
 
-    @inject(Types.listener.webhook)
-    private webhookListener: WebhookListener;
+    @inject(Types.listener.report)
+    private reportListener: ReportListener;
 
     @inject(Types.factory.interactiveReport)
     private reportCreatorFactory: ReportCreatorFactory;
@@ -52,7 +54,7 @@ export default class ReportPlugin extends AbstractPlugin {
     public async initialize(): Promise<void> {
         this.client.once(
             'ready',
-            () => this.webhookListener.initialize().then(() => this.logger.info('Webhook Listener Initialized')),
+            () => this.reportListener.initialize().then(() => this.logger.info('Webhook Listener Initialized')),
         );
     }
 
@@ -76,6 +78,72 @@ export default class ReportPlugin extends AbstractPlugin {
 
         await report.close(false);
         delete this.reportConversations[this.context.user.id];
+
+        return this.reactOk();
+    }
+
+    // tslint:disable-next-line
+    @Decorator.Command(
+        'setup',
+        'Set up reports to go to a channel the bot is in.',
+        `Set up reports to go to a channel the bot is in.
+        
+onlyUsersInGuild should be \`true\` or \`yes\` (anything else is no). If set to no, will alert you to ALL reports.
+
+tags should be \`all\` or a list (comma or space delimited) list of tags from: {prefix}tags
+`,
+    )
+    @Decorator.Permission('report.setup')
+    @Decorator.Types({channel: GuildChannel})
+    public async SetupCommand(
+        channel: GuildChannel,
+        onlyUsersInGuild: string            = null,
+        @Decorator.Remainder() tags: string = null,
+    ) {
+        onlyUsersInGuild = onlyUsersInGuild || 'true';
+        tags             = tags || 'all';
+
+        try {
+            await channel.editPermission(
+                this.client.user.id,
+                93248,
+                0,
+                'member',
+                'Granting access to post in setup channel',
+            );
+        } catch (e) {
+            return this.reply('Failed to set up the channel. Missing Permissions.');
+        }
+
+        const subscription      = new Subscription();
+        subscription.guildId    = channel.guild.id;
+        subscription.channelId  = channel.id;
+        subscription.insertDate = new Date();
+        subscription.updateDate = new Date();
+        subscription.tags       = [];
+
+        onlyUsersInGuild             = onlyUsersInGuild.toLowerCase();
+        subscription.onUsersInServer = ['true', 'yes'].includes(onlyUsersInGuild);
+
+        const validTags = await this.getAllTags();
+        let parsedTags: number[];
+        if (tags === 'all') {
+            parsedTags = validTags.map((tag) => tag.id);
+        } else {
+            parsedTags = tags.replace(/\s+/g, ',')
+                             .split(',')
+                             .map((x) => parseInt(x, 10));
+        }
+        for (const tag of parsedTags) {
+            if (validTags.findIndex((vt) => vt.id === tag) === -1) {
+                return this.reply(`\`${tag}\` is not a valid tag.`);
+            }
+            subscription.tags.push(tag);
+        }
+        await (channel as TextChannel).createMessage('Watcher is now set up to post in this channel.');
+
+        await subscription.save();
+
 
         return this.reactOk();
     }
@@ -241,5 +309,11 @@ export default class ReportPlugin extends AbstractPlugin {
         };
 
         return embed;
+    }
+
+    private async getAllTags(): Promise<interfaces.Tag[]> {
+        const result = await this.api.get<{ count: number, results: interfaces.Tag[] }>('/tag');
+
+        return result.data.results;
     }
 };
