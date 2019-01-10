@@ -37,24 +37,59 @@ export default class ReportListener {
 
     public async initialize() {
         this.webserver.post('/subscription/global', async (req, res) => {
-            const subscriptions             = await this.subscriptionRepo.find();
-            const report: interfaces.Report = parse(req.body.report);
+            const subscriptions                = await this.subscriptionRepo.find();
+            const report: interfaces.Report    = parse(req.body.report);
+            const oldReport: interfaces.Report = req.body.oldReport ? parse(req.body.report) : null;
 
-            const promises = subscriptions.map((subscription) => {
+            const shouldHaveMessage: number[] = [];
+
+            // Loop through all the subscriptions
+            const promises = subscriptions.map(async (subscription) => {
+                // Grab all the tags for this subscription
                 const tags = subscription.tags.map((x) => parseInt('' + x, 10));
+                // Loop through all the report's tags
                 for (const tag of report.tags) {
+                    // If the subscription tags include the current tag
                     if (tags.includes(tag.id)) {
+                        // Send it, mark as it shouldHaveMessage
+                        shouldHaveMessage.push(subscription.id);
+
                         return this.sendReportToSubscription(req.body.action, report, subscription);
                     }
                 }
 
-                return Promise.resolve();
+                // If none of the tags matched, delete it!
+                await this.sendReportToSubscription('delete', report, subscription);
             });
+
+            // If there is an old report
+            if (oldReport) {
+                // Loop through all the subscriptions
+                promises.push(...subscriptions
+                    .filter((x) => !shouldHaveMessage.includes(x.id))
+                    .map(async (subscription) => {
+                        // Grab all the tags for this subscription
+                        const tags        = subscription.tags.map((x) => parseInt('' + x, 10));
+                        // Find all tags that are no longer in the new report
+                        const removedTags = oldReport.tags.filter((x) => {
+                            return report.tags.findIndex((y) => x.id === y.id) === -1;
+                        });
+                        // Loop through the removed tags
+                        for (const tag of removedTags) {
+                            // If the current removed tag matches a subscription's tags
+                            if (tags.includes(tag.id)) {
+                                // Delete it!
+                                return this.sendReportToSubscription('delete', report, subscription);
+                            }
+                        }
+                    }));
+            }
 
             try {
                 await Promise.all(promises);
                 res.status(204).send();
             } catch (e) {
+                console.log(e);
                 res.status(500).json(e);
             }
         });
@@ -189,7 +224,10 @@ export default class ReportListener {
          * If there is no report message, just treat this as a new message
          */
         if (['edit', 'new'].indexOf(action) >= 0 && reportMessage) {
-            message = await channel.getMessage(reportMessage.messageId);
+            try {
+                message = await channel.getMessage(reportMessage.messageId);
+            } catch (_) {
+            }
             if (message) {
                 await message.edit({embed: embed.serialize()});
                 reportMessage.updateDate = new Date();
@@ -211,12 +249,15 @@ export default class ReportListener {
          */
         if (action === 'delete') {
             if (!reportMessage) {
-                this.logger.warn('Deleting report with no reportMessage: \n%O', {action, report, subscription});
+                this.logger.warn('Deleting report with no reportMessage: %d %d', report.id, subscription.id);
 
                 return;
             }
 
-            message               = await channel.getMessage(reportMessage.messageId);
+            try {
+                message = await channel.getMessage(reportMessage.messageId);
+            } catch (_) {
+            }
             reportMessage.deleted = true;
             if (message) {
                 await message.delete('Deleted Report');

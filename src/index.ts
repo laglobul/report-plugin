@@ -117,13 +117,13 @@ export default class ReportPlugin extends AbstractPlugin {
         }
 
         let body: { tags?: number[], reason?: string, links?: string[], reportedUsers?: string[], guildId?: string };
-        switch (mapping[field.toLowerCase()]) {
+        switch (mapping[field.toString().toLowerCase()]) {
             default:
                 return message.edit(
                     `\`${field}\` is not a valid field. Pick from: ids, reason, tags, links, or guild`,
                 );
             case 'ids':
-                const ids = value.match(/(\d+)/g);
+                const ids = value.toString().match(/(\d+)/g);
                 if (!ids) {
                     return message.edit('Those don\'t look like valid ids.');
                 }
@@ -140,7 +140,7 @@ export default class ReportPlugin extends AbstractPlugin {
                 body = {reportedUsers: users};
                 break;
             case 'tags':
-                const tags = value.match(/(\d+)/g).map((x) => parseInt(x, 10));
+                const tags = value.toString().match(/(\d+)/g).map((x) => parseInt(x, 10));
                 if (!tags) {
                     return message.edit('Those don\'t look like valid tags.');
                 }
@@ -163,7 +163,7 @@ export default class ReportPlugin extends AbstractPlugin {
                 body = {tags: newTags};
                 break;
             case 'links':
-                const links = value.split(' ').filter((x) => x.length > 1);
+                const links = value.toString().split(' ').filter((x) => x.length > 1);
                 if (!links || links.length === 0) {
                     return message.edit('Those don\'t look like valid links.');
                 }
