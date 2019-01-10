@@ -273,7 +273,9 @@ export default class ReportListener {
     }
 
     private async addReactions(message: Message): Promise<void> {
-        return message.addReaction('➕');
+        if ((message.channel as TextChannel).guild.id !== '204100839806205953') {
+            return message.addReaction('➕');
+        }
     }
 
     private async createReportEmbed(report: interfaces.Report): Promise<Embed> {
