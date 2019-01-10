@@ -89,6 +89,120 @@ export default class ReportPlugin extends AbstractPlugin {
         }
     }
 
+    @Decorator.Command('report edit', 'Edit a report', 'Passing IDs, tags, and links act as a toggle.')
+    @Decorator.Permission('report.edit')
+    public async EditReportCommand(id: number, field: string, @Decorator.Remainder() value: string): Promise<any> {
+        const message = await this.context.channel.createMessage('Editing Report... Please wait.');
+
+        const mapping = {
+            id:     'ids',
+            ids:    'ids',
+            user:   'ids',
+            users:  'ids',
+            reason: 'reason',
+            tag:    'tags',
+            tags:   'tags',
+            link:   'links',
+            links:  'links',
+            guild:  'guild',
+            server: 'guild',
+        };
+
+        let report: interfaces.Report;
+        try {
+            const reportRequest = await this.api.get<interfaces.Report>('/report/' + id);
+            report              = reportRequest.data;
+        } catch (e) {
+            await message.edit('Could not find a report with that id.');
+        }
+
+        let body: { tags?: number[], reason?: string, links?: string[], reportedUsers?: string[], guildId?: string };
+        switch (mapping[field.toLowerCase()]) {
+            default:
+                return message.edit(
+                    `\`${field}\` is not a valid field. Pick from: ids, reason, tags, links, or guild`,
+                );
+            case 'ids':
+                const ids = value.match(/(\d+)/g);
+                if (!ids) {
+                    return message.edit('Those don\'t look like valid ids.');
+                }
+
+                const users: string[] = report.reportedUsers.map((x) => x.id);
+                ids.forEach((x, index) => {
+                    if (users.includes(x)) {
+                        users.splice(index, 1);
+                    } else {
+                        users.push(x);
+                    }
+                });
+
+                body = {reportedUsers: users};
+                break;
+            case 'tags':
+                const tags = value.match(/(\d+)/g).map((x) => parseInt(x, 10));
+                if (!tags) {
+                    return message.edit('Those don\'t look like valid tags.');
+                }
+                const validTags = await this.getAllTags();
+                for (const tag of tags) {
+                    if (validTags.findIndex((vt) => vt.id === tag) === -1) {
+                        return this.reply(`\`${tag}\` is not a valid tag.`);
+                    }
+                }
+
+                const newTags: number[] = report.tags.map((x) => x.id);
+                tags.forEach((x, index) => {
+                    if (newTags.includes(x)) {
+                        newTags.splice(index, 1);
+                    } else {
+                        newTags.push(x);
+                    }
+                });
+
+                body = {tags: newTags};
+                break;
+            case 'links':
+                const links = value.split(' ').filter((x) => x.length > 1);
+                if (!links || links.length === 0) {
+                    return message.edit('Those don\'t look like valid links.');
+                }
+
+                const newLinks: string[] = report.links;
+                links.forEach((x, index) => {
+                    if (newLinks.includes(x)) {
+                        newLinks.splice(index, 1);
+                    } else {
+                        newLinks.push(x);
+                    }
+                });
+
+                body = {links: newLinks};
+                break;
+            case 'guild':
+                if (!/\d+/.test(value)) {
+                    return message.edit('That doesn\'t look like a valid guild id');
+                }
+
+                body = {guildId: value};
+                break;
+        }
+
+        try {
+            await this.api.post(`/report/${id}`, body);
+
+            return message.edit('Report has been edited.');
+        } catch (e) {
+            if (e.response && e.response.data) {
+                this.logger.error('Error editing report: %j', e.response.data);
+            } else {
+                this.logger.error('Error editing report: %O', e);
+            }
+
+            return message.edit('There was an error editing the report.');
+        }
+    }
+
     @Decorator.Command('report close', 'Closes an open report')
     @Decorator.Permission('report.close')
     public async CloseReportCommand(): Promise<void> {
