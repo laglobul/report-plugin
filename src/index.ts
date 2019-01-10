@@ -69,6 +69,26 @@ export default class ReportPlugin extends AbstractPlugin {
         return this.sendEmbed(embed);
     }
 
+    @Decorator.Command('alert')
+    public async AlertCommand(@Decorator.Remainder() _: string) {
+        return this.reply(`Please use ${this.prefix}report`);
+    }
+
+    @Decorator.Command('report delete', 'Delete a report')
+    @Decorator.Permission('report.delete')
+    public async DeleteReportCommand(id: number): Promise<void> {
+        const message = await this.context.channel.createMessage('Deleting Report... Please wait.');
+        try {
+            await this.api.delete('/report/' + id);
+
+            await message.edit('Successfully deleted report: ' + id);
+        } catch (e) {
+            this.logger.error('Error deleting report: %s', e.message);
+
+            await message.edit('There was an error deleting the report.');
+        }
+    }
+
     @Decorator.Command('report close', 'Closes an open report')
     @Decorator.Permission('report.close')
     public async CloseReportCommand(): Promise<void> {
@@ -144,6 +164,14 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
         await (channel as TextChannel).createMessage('Watcher is now set up to post in this channel.');
 
         await subscription.save();
+
+        return this.reactOk();
+    }
+
+    @Decorator.Command('requeue', 'Requeues a report')
+    @Decorator.Permission('report.requeue')
+    public async requeue(id: number) {
+        await this.api.post(`/report/${id}/requeue`);
 
         return this.reactOk();
     }
@@ -266,7 +294,7 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
 
             await message.edit('Successfully edited tag: ' + id);
         } catch (e) {
-            this.logger.error('Error fetching tags: %s', e.message);
+            this.logger.error('Error editing tags: %s', e.message);
 
             await message.edit('There was an error editing the tag.');
         }
@@ -281,7 +309,7 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
 
             await message.edit('Successfully deleted tag: ' + id);
         } catch (e) {
-            this.logger.error('Error fetching tags: %s', e.message);
+            this.logger.error('Error deleting tag: %s', e.message);
 
             await message.edit('There was an error deleting the tag.');
         }

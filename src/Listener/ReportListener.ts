@@ -183,11 +183,12 @@ export default class ReportListener {
         const embed                      = await this.createReportEmbed(report);
 
         /**
-         * If we are editing an existing report, go through here.
+         * If we are editing an existing report, go through here. (We should also test to see if somehow a new has
+         * happened AFTER an edit.
          *
          * If there is no report message, just treat this as a new message
          */
-        if (action === 'edit' && reportMessage) {
+        if (['edit', 'new'].indexOf(action) >= 0 && reportMessage) {
             message = await channel.getMessage(reportMessage.messageId);
             if (message) {
                 await message.edit({embed: embed.serialize()});
@@ -210,6 +211,8 @@ export default class ReportListener {
          */
         if (action === 'delete') {
             if (!reportMessage) {
+                this.logger.warn('Deleting report with no reportMessage: \n%O', {action, report, subscription});
+
                 return;
             }
 
