@@ -285,7 +285,7 @@ export default class ReportListener {
         }
 
         if (report.links.length > 0) {
-            description += `\n\n**Links:** \n${links.join('\\n')}`;
+            description += `\n\n**Links:** \n${links.join('\n')}`;
         }
 
         const created    = moment(report.insertDate).format('YYYY-MM-DD HH:mm');
