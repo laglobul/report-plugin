@@ -11,7 +11,6 @@ import {Logger} from 'winston';
 
 import ReportMessage from '../Entity/ReportMessage';
 import Subscription from '../Entity/Subscription';
-import ReportPlugin from '../index';
 import * as interfaces from '../interfaces';
 import Types from '../types';
 
@@ -20,8 +19,6 @@ export default class ReportListener {
     private reportMessageRepo: Repository<ReportMessage>;
 
     private subscriptionRepo: Repository<Subscription>;
-
-    private guild: Guild;
 
     public constructor(
         @inject(Types.webserver) private webserver: Express,
@@ -39,14 +36,6 @@ export default class ReportListener {
     }
 
     public async initialize() {
-        this.guild = this.client.guilds.get(ReportPlugin.Config.hotlineGuildId);
-        if (!this.guild) {
-            return this.logger.error(
-                'Failed to initialize WebhookListener. Guild could not be found with the id: %s',
-                ReportPlugin.Config.hotlineGuildId,
-            );
-        }
-
         this.webserver.post('/subscription/global', async (req, res) => {
             const subscriptions             = await this.subscriptionRepo.find();
             const report: interfaces.Report = parse(req.body.report);
