@@ -21,13 +21,20 @@ export interface Report {
     reporter: User;
     guildId?: string;
     reportedUsers: User[];
-    confirmationUsers: User[];
+    confirmations: Confirmation[];
     reason: string;
     tags: Tag[];
     links: string[];
     messageIds: string[];
     insertDate: Date;
     updateDate: Date;
+}
+
+export interface Confirmation {
+    report?: Report;
+    user: User;
+    guild: string;
+    insertDate: Date;
 }
 
 export interface Config {

@@ -1,8 +1,9 @@
 import {AxiosInstance, default as axios} from 'axios';
-import {GuildChannel, TextChannel} from 'eris';
+import {GuildChannel, Permission as ErisPermission, TextChannel} from 'eris';
 import {AbstractPlugin} from 'eris-command-framework';
 import Decorator from 'eris-command-framework/Decorator';
 import Embed from 'eris-command-framework/Model/Embed';
+import Permission from 'eris-command-framework/Util/Permission';
 import {Express} from 'express';
 import {Container, inject, injectable} from 'inversify';
 
@@ -24,7 +25,7 @@ export default class ReportPlugin extends AbstractPlugin {
         container.bind<string>(Types.api.url).toConstantValue(this.Config.apiUrl || 'https://api.hotline.gg/');
         container.bind<AxiosInstance>(Types.api.client).toDynamicValue((ctx) => axios.create({
             baseURL: ctx.container.get(Types.api.url),
-            timeout: 5000,
+            timeout: 30000,
             headers: {
                 'Authorization': 'Bearer ' + apiKey,
                 'Accepts':       'application/json',
@@ -103,16 +104,16 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
         onlyUsersInGuild = onlyUsersInGuild || 'true';
         tags             = tags || 'all';
 
-        try {
-            await channel.editPermission(
-                this.client.user.id,
-                93248,
-                0,
-                'member',
-                'Granting access to post in setup channel',
+        const member = channel.guild.members.get(this.client.user.id);
+        const perms  = Permission.getEffectivePermission(member, channel);
+        // tslint:disable-next-line
+        if ((perms & 93248) != 93248) {
+            const perm = new ErisPermission(93248, 0);
+
+            return this.reply(
+                'Failed to set up the channel. Required Permissions: ' +
+                Object.keys(perm.json).join(', '),
             );
-        } catch (e) {
-            return this.reply('Failed to set up the channel. Missing Permissions.');
         }
 
         const subscription      = new Subscription();
@@ -143,7 +144,6 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
         await (channel as TextChannel).createMessage('Watcher is now set up to post in this channel.');
 
         await subscription.save();
-
 
         return this.reactOk();
     }
@@ -305,7 +305,7 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
 **Tags:** ${tags.length === 0 ? 'None' : tags.join(',t')}`;
         embed.footer      = {
             text: `Reporter: ${reporter.username}#${reporter.discriminator}` +
-                  ` | Confirmations: ${report.confirmationUsers.length}`,
+                  ` | Confirmations: ${report.confirmations.length + 1}`,
         };
 
         return embed;

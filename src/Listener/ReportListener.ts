@@ -1,8 +1,9 @@
 import {AxiosInstance} from 'axios';
-import {Client, Guild, Member, Message, TextChannel} from 'eris';
+import {Client, Guild, GuildChannel, Member, Message, TextChannel} from 'eris';
 import {types as CFTypes} from 'eris-command-framework';
 import Embed from 'eris-command-framework/Model/Embed';
 import {Express} from 'express';
+import {parse} from 'flatted';
 import {inject, injectable} from 'inversify';
 import * as moment from 'moment';
 import {Connection, Repository} from 'typeorm';
@@ -34,6 +35,7 @@ export default class ReportListener {
 
         this.client.off('guildMemberAdd', this.onGuildMemberAdd.bind(this));
         this.client.on('guildMemberAdd', this.onGuildMemberAdd.bind(this));
+        this.client.on('messageReactionAdd', this.onMessageReaction.bind(this));
     }
 
     public async initialize() {
@@ -47,7 +49,7 @@ export default class ReportListener {
 
         this.webserver.post('/subscription/global', async (req, res) => {
             const subscriptions             = await this.subscriptionRepo.find();
-            const report: interfaces.Report = JSON.parse(req.body.report);
+            const report: interfaces.Report = parse(req.body.report);
 
             const promises = subscriptions.map((subscription) => {
                 const tags = subscription.tags.map((x) => parseInt('' + x, 10));
@@ -88,7 +90,7 @@ export default class ReportListener {
             return;
         }
 
-        const reports = reportCall.data.results;
+        const reports       = reportCall.data.results;
         const subscriptions = await this.subscriptionRepo.find({guildId: guild.id});
         for (const subscription of subscriptions) {
             const tags = subscription.tags.map((x) => parseInt('' + x, 10));
@@ -100,6 +102,63 @@ export default class ReportListener {
                     }
                 }
             }
+        }
+    }
+
+    private async onMessageReaction(
+        message: Message,
+        emoji: { id: string, name: string },
+        userId: string,
+    ): Promise<void> {
+        if (!message.author) {
+            message = await message.channel.getMessage(message.id);
+        }
+        if (message.author.id !== this.client.user.id || userId === this.client.user.id) {
+            return;
+        }
+
+        const reportMessage = await this.reportMessageRepo.findOne({messageId: message.id});
+        if (!reportMessage) {
+            return;
+        }
+
+        const guild = (message.channel as GuildChannel).guild;
+        if (!guild || guild.id === '204100839806205953') {
+            return;
+        }
+
+        switch (emoji.name) {
+            default:
+                return;
+            case '➕':
+                await this.updateConfirmation(reportMessage.reportId, guild.id, userId, true);
+                await message.removeReactions();
+                await message.addReaction('❌');
+                break;
+            case '❌':
+                await this.updateConfirmation(reportMessage.reportId, guild.id, userId, false);
+                await message.removeReactions();
+                await message.addReaction('➕');
+                break;
+        }
+    }
+
+    private async updateConfirmation(report: number, guild: string, user: string, confirmed: boolean): Promise<void> {
+        const url = `/report/${report}/confirm`;
+        try {
+            await this.api.post(url, {guild, user, confirmed});
+        } catch (e) {
+            if (!e.response || !e.response.data || !e.response.data.message) {
+                console.log(e.response && e.response.data ? e.response.data : e.response);
+
+                throw e;
+            }
+
+            if (e.response.data.message === 'report already confirmed') {
+                return;
+            }
+
+            throw e;
         }
     }
 
@@ -146,7 +205,8 @@ export default class ReportListener {
                 reportMessage.updateDate = new Date();
                 await reportMessage.save();
             } else {
-                message                 = await channel.createMessage({embed: embed.serialize()});
+                message = await channel.createMessage({embed: embed.serialize()});
+                this.addReactions(message);
                 reportMessage.messageId = message.id;
                 await reportMessage.save();
             }
@@ -195,10 +255,11 @@ export default class ReportListener {
          * edit fires before a message is created
          */
         message = await channel.createMessage({embed: embed.serialize()});
+        this.addReactions(message);
         if (!reportMessage) {
             reportMessage            = new ReportMessage();
             reportMessage.reportId   = report.id;
-            reportMessage.guildId    = this.guild.id;
+            reportMessage.guildId    = guild.id;
             reportMessage.channelId  = channel.id;
             reportMessage.insertDate = new Date();
         }
@@ -209,6 +270,10 @@ export default class ReportListener {
         await reportMessage.save();
 
         return;
+    }
+
+    private async addReactions(message: Message): Promise<void> {
+        return message.addReaction('➕');
     }
 
     private async createReportEmbed(report: interfaces.Report): Promise<Embed> {
@@ -230,7 +295,7 @@ export default class ReportListener {
         }
 
         const created    = moment(report.insertDate).format('YYYY-MM-DD HH:mm');
-        const footerText = `Confirmations: ${report.confirmationUsers.length} | Created: ${created}`;
+        const footerText = `Confirmations: ${report.confirmations.length + 1} | Created: ${created}`;
 
         const embed = new Embed();
 

@@ -23,7 +23,8 @@
     "peerDependencies": {
         "eris": "^0.9",
         "express": "^4.16",
-        "eris-command-framework": "^2.1"
+        "eris-command-framework": "^2.3",
+        "flatted": "^2.0.0"
     },
     "dependencies": {
         "axios": "^0.18.0"
