@@ -264,7 +264,10 @@ Examples:
     // @ts-ignore
     private async setReportLinks(emitter: EventEmitter, message: Message): Promise<void> {
         if (require('yes-no').parse(message.content) !== false) {
-            this.report.links = message.content.split(' ');
+            this.report.links = message.content
+                                       .replace(/,/g, '')
+                                       .replace(/\s+/g, ' ')
+                                       .split(' ');
         } else {
             this.report.noLinks = true;
         }
