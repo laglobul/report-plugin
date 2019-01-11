@@ -89,6 +89,31 @@ export default class ReportPlugin extends AbstractPlugin {
         }
     }
 
+    @Decorator.Command(
+        'report ids',
+        'Get a report\'s ids',
+        'Space delimited by default. If you want to delimit by another character, pass it as the last argument\n' +
+        'If you pass \`mention\`, it will create mentions (space delimited)',
+    )
+    @Decorator.Permission('report.get')
+    public async GetReportIdsCommand(id: number, delimiter: string = null): Promise<void> {
+        let report: interfaces.Report;
+        try {
+            const reportRequest = await this.api.get<interfaces.Report>('/report/' + id);
+            report = reportRequest.data;
+        } catch (e) {
+            return this.reply('There was no report with that id.');
+        }
+
+        let ids = report.reportedUsers.map((x) => x.id);
+        if (delimiter === 'mention') {
+            ids = ids.map((x) => '<@' + x + '>');
+            delimiter = null;
+        }
+
+        return this.reply(ids.join(delimiter || ' '));
+    }
+
     @Decorator.Command('report edit', 'Edit a report', 'Passing IDs, tags, and links act as a toggle.')
     @Decorator.Permission('report.edit')
     public async EditReportCommand(id: number, field: string, @Decorator.Remainder() value: string): Promise<any> {
