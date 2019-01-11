@@ -325,7 +325,6 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
         'If reason or tags aren\'t passed, this command becomes interactive, and will ask you to fill out the report.',
     )
     @Decorator.Alias('report')
-    @Decorator.Permission('report.create')
     public async CreateCommand(@Decorator.Remainder() content: string = null): Promise<void> {
         const init: Partial<Report> = {};
         if (content !== null) {
