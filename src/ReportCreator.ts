@@ -263,14 +263,21 @@ Examples:
 
     // @ts-ignore
     private async setReportLinks(emitter: EventEmitter, message: Message): Promise<void> {
-        if (require('yes-no').parse(message.content) !== false) {
+        if (require('yes-no').parse(message.content || '') !== false) {
             this.report.links = message.content
                                        .replace(/,/g, '')
                                        .replace(/\s+/g, ' ')
                                        .split(' ')
                                        .map((link) => link.trim().replace(/(^<)|(>$)/, ''))
                                        .filter((x) => !!x);
-        } else {
+        }
+
+        if (message.attachments.length > 0) {
+            const links        = message.attachments.map((x) => x.url);
+            this.report.links  = this.report.links ? this.report.links.concat(...links) : links;
+        }
+
+        if (!this.report.links || this.report.links.length === 0) {
             this.report.noLinks = true;
         }
 

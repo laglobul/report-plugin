@@ -353,6 +353,11 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
                                         .filter((x) => !!x);
                 }
 
+                if (this.context.message.attachments.length > 0) {
+                    const links = this.context.message.attachments.map((x) => x.url);
+                    init.links = init.links ? init.links.concat(...links) : links;
+                }
+
                 if (/Reason:\s/.test(section)) {
                     init.reason = section.replace(/Reason:\s+/i, '').trim();
                 }
