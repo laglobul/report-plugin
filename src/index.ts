@@ -1,3 +1,4 @@
+import Guild from '@hotline/application-plugin/Entity/Guild';
 import {AxiosInstance, default as axios} from 'axios';
 import {GuildChannel, Permission as ErisPermission, TextChannel} from 'eris';
 import {AbstractPlugin} from 'eris-command-framework';
@@ -61,7 +62,6 @@ export default class ReportPlugin extends AbstractPlugin {
 
     @Decorator.Command('report get', 'Gets a report')
     @Decorator.Alias('show', 'show report')
-    @Decorator.Permission('report.show')
     public async GetCommand(id: number): Promise<void> {
         const report = (await this.api.get<interfaces.Report>('/report/' + id)).data;
         const embed  = await this.createReportEmbed(report);
@@ -95,7 +95,6 @@ export default class ReportPlugin extends AbstractPlugin {
         'Space delimited by default. If you want to delimit by another character, pass it as the last argument\n' +
         'If you pass \`mention\`, it will create mentions (space delimited)',
     )
-    @Decorator.Permission('report.get')
     public async GetReportIdsCommand(id: number, delimiter: string = null): Promise<void> {
         let report: interfaces.Report;
         try {
@@ -115,7 +114,6 @@ export default class ReportPlugin extends AbstractPlugin {
     }
 
     @Decorator.Command('report edit', 'Edit a report', 'Passing IDs, tags, and links act as a toggle.')
-    @Decorator.Permission('report.edit')
     public async EditReportCommand(id: number, field: string, @Decorator.Remainder() value: string): Promise<any> {
         const message = await this.context.channel.createMessage('Editing Report... Please wait.');
 
@@ -229,7 +227,6 @@ export default class ReportPlugin extends AbstractPlugin {
     }
 
     @Decorator.Command('report close', 'Closes an open report')
-    @Decorator.Permission('report.close')
     public async CloseReportCommand(): Promise<void> {
         const report = this.reportConversations[this.context.user.id];
         if (!report) {
@@ -253,7 +250,6 @@ onlyUsersInGuild should be \`true\` or \`yes\` (anything else is no). If set to 
 tags should be \`all\` or a list (comma or space delimited) list of tags from: {prefix}tags
 `,
     )
-    @Decorator.Permission('report.setup')
     @Decorator.Types({channel: GuildChannel})
     public async SetupCommand(
         channel: GuildChannel,
@@ -262,6 +258,12 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
     ) {
         onlyUsersInGuild = onlyUsersInGuild || 'true';
         tags             = tags || 'all';
+
+        const repo = this.database.getRepository<Guild>(Guild);
+        const dbGuild = await repo.findOne({guildId: channel.guild.id});
+        if (!dbGuild || !dbGuild.owners.includes(this.context.member.id)) {
+            return;
+        }
 
         const member = channel.guild.members.get(this.client.user.id);
         const perms  = Permission.getEffectivePermission(member, channel);

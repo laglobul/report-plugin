@@ -21,6 +21,7 @@
         "access": "public"
     },
     "peerDependencies": {
+        "@hotline/application-plugin": "^1.19.6",
         "eris": "^0.9",
         "express": "^4.16",
         "eris-command-framework": "^2.3",
