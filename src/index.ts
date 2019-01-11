@@ -266,8 +266,8 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
         const member = channel.guild.members.get(this.client.user.id);
         const perms  = Permission.getEffectivePermission(member, channel);
         // tslint:disable-next-line
-        if ((perms & 93248) != 93248) {
-            const perm = new ErisPermission(93248, 0);
+        if ((perms & 85056) != 85056) {
+            const perm = new ErisPermission(85056, 0);
 
             return this.reply(
                 'Failed to set up the channel. Required Permissions: ' +
