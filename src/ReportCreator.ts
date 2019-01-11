@@ -267,7 +267,9 @@ Examples:
             this.report.links = message.content
                                        .replace(/,/g, '')
                                        .replace(/\s+/g, ' ')
-                                       .split(' ');
+                                       .split(' ')
+                                       .map((link) => link.trim().replace(/(^<)|(>$)/, ''))
+                                       .filter((x) => !!x);
         } else {
             this.report.noLinks = true;
         }

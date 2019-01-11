@@ -347,7 +347,10 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
             // Loop through all the sections
             for (const section of splitContent) {
                 if (/Links:\s+/i.test(section)) {
-                    init.links = section.replace(/Links:\s+/i, '').split(' ').filter((x) => !!x);
+                    init.links = section.replace(/Links:\s+/i, '')
+                                        .split(' ')
+                                        .map((link) => link.trim().replace(/(^<)|(>$)/, ''))
+                                        .filter((x) => !!x);
                 }
 
                 if (/Reason:\s/.test(section)) {
