@@ -328,6 +328,11 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
     )
     @Decorator.Alias('report')
     public async CreateCommand(@Decorator.Remainder() content: string = null): Promise<void> {
+        // TODO: Replacing this in the future with a better way of disabling features
+        if (process.env.maintenance) {
+            return this.reply('Creating reports is currently not possible as maintenance mode is enabled.')
+        }
+
         const init: Partial<Report> = {};
         if (content !== null) {
             // Some shitty logic here. Feel free to clean this up
