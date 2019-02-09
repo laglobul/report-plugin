@@ -261,8 +261,10 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
 
         const repo = this.database.getRepository<Guild>(Guild);
         const dbGuild = await repo.findOne({guildId: channel.guild.id});
-        if (!dbGuild || !dbGuild.owners.includes(this.context.member.id)) {
-            return;
+        if (!dbGuild) {
+            return this.reply('This channel belongs to a unknown guild. Double check to make sure that this guild belongs to Hotline and else contact the admins with the admin ping.');
+        } if (!dbGuild.owners.includes(this.context.member.id)) {
+            return this.reply('You are not listed as one of the owners/representatives for this guild. You can claim the guild with the claim command if you are a owner/representative of this guild.')
         }
 
         const member = channel.guild.members.get(this.client.user.id);
@@ -326,6 +328,11 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
     )
     @Decorator.Alias('report')
     public async CreateCommand(@Decorator.Remainder() content: string = null): Promise<void> {
+        // TODO: Replacing this in the future with a better way of disabling features
+        if (process.env.maintenance) {
+            return this.reply('Creating reports is currently not possible as maintenance mode is enabled.')
+        }
+
         const init: Partial<Report> = {};
         if (content !== null) {
             // Some shitty logic here. Feel free to clean this up
