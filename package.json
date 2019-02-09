@@ -20,6 +20,20 @@
     "publishConfig": {
         "access": "public"
     },
+    "release": {
+        "plugins": [
+            "@semantic-release/commit-analyzer",
+            "@semantic-release/release-notes-generator",
+            [
+                "@semantic-release/changelog",
+                {
+                    "changelogFile": "CHANGELOG.md"
+                }
+            ],
+            "@semantic-release/git",
+            "@semantic-release/npm"
+        ]
+    },
     "peerDependencies": {
         "@hotline/application-plugin": "^1.19.6",
         "eris": "^0.9",
