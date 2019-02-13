@@ -169,7 +169,7 @@ export default class ReportCreator extends EventEmitter {
                     await msg.edit('Report Created. ID: ' + response.data.id);
                 } catch (e) {
                     await msg.edit('There was an error creating the report. Try again later!');
-                    console.error(JSON.stringify({response: e.response.data, request: this.report}, null, 2));
+                    console.error(JSON.stringify({response: e.response ? e.response.data : e, request: this.report}, null, 2));
                 }
                 this.emit('close');
                 break;
