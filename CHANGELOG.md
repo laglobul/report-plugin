@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/DiscordHotline/report-plugin/compare/v1.3.2...v1.3.3) (2019-02-14)
+
+
+### Bug Fixes
+
+* **commands:** Removing create alias, fixing get command ([3742f97](https://github.com/DiscordHotline/report-plugin/commit/3742f97))
+
 ## [1.3.2](https://github.com/DiscordHotline/report-plugin/compare/v1.3.1...v1.3.2) (2019-02-13)
 
 
