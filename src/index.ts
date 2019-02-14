@@ -326,7 +326,6 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
         'Creates a report',
         'If reason or tags aren\'t passed, this command becomes interactive, and will ask you to fill out the report.',
     )
-    @Decorator.Alias('report')
     public async CreateCommand(@Decorator.Remainder() content: string = null): Promise<void> {
         // TODO: Replacing this in the future with a better way of disabling features
         if (process.env.maintenance) {
@@ -481,13 +480,13 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
         const embed = new Embed();
 
         embed.author      = {name: `Report ID: ${report.id}`};
-        embed.description = `**Users:** ${reportedUsers.join(', ')}
+        embed.description = `**Users:** ${reportedUsers.splice(0, 10).join(', ')}
         
 **Reason:** ${report.reason}
 
 **Links:** ${links.length === 0 ? 'None' : links.join('\n')}
 
-**Tags:** ${tags.length === 0 ? 'None' : tags.join(',t')}`;
+**Tags:** ${tags.length === 0 ? 'None' : tags.join(', ')}`;
         embed.footer      = {
             text: `Reporter: ${reporter.username}#${reporter.discriminator}` +
                   ` | Confirmations: ${report.confirmations.length + 1}`,
