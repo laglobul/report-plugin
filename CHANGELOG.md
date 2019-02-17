@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/DiscordHotline/report-plugin/compare/v1.4.1...v1.5.0) (2019-02-17)
+
+
+### Features
+
+* **reportConfirm:** Also remove reaction if user is not part of chosen guild ([74db6a8](https://github.com/DiscordHotline/report-plugin/commit/74db6a8))
+
 ## [1.4.1](https://github.com/DiscordHotline/report-plugin/compare/v1.4.0...v1.4.1) (2019-02-17)
 
 
