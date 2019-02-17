@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/DiscordHotline/report-plugin/compare/v1.4.0...v1.4.1) (2019-02-17)
+
+
+### Bug Fixes
+
+* **reportConfirm:** Fixed user mention when confirming ([ff07fa9](https://github.com/DiscordHotline/report-plugin/commit/ff07fa9))
+
 # [1.4.0](https://github.com/DiscordHotline/report-plugin/compare/v1.3.3...v1.4.0) (2019-02-17)
 
 
