@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/DiscordHotline/report-plugin/compare/v1.3.3...v1.4.0) (2019-02-17)
+
+
+### Bug Fixes
+
+* **gitignore:** Ignore node_modules ([98cd2d6](https://github.com/DiscordHotline/report-plugin/commit/98cd2d6))
+
+
+### Features
+
+* **reportConfirm:** Added interactive command for confirming reports ([be76f0b](https://github.com/DiscordHotline/report-plugin/commit/be76f0b))
+
 ## [1.3.3](https://github.com/DiscordHotline/report-plugin/compare/v1.3.2...v1.3.3) (2019-02-14)
 
 
