@@ -79,7 +79,7 @@ export default class ConfirmCreator {
 
   // @ts-ignore
   private async confirmReport(userId: string, guild: Guild) {
-    const userMention = this.context.user.mention
+    const userMention = `<@${userId}>`
     const textChannel = this.context.channel
     const confirmUrl  = `/report/${this.report.id}/confirm`
 
