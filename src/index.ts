@@ -16,6 +16,8 @@ import Report from './Model/Report';
 import ReportCreator from './ReportCreator';
 import ReportCreatorFactory from './ReportCreatorFactory';
 import Types from './types';
+import ConfirmCreator from './ConfirmCreator';
+import ReportConfirmFactory from './ReportConfirmFactory';
 
 @injectable()
 export default class ReportPlugin extends AbstractPlugin {
@@ -34,6 +36,7 @@ export default class ReportPlugin extends AbstractPlugin {
             },
         }));
         container.bind<ReportCreatorFactory>(Types.factory.interactiveReport).to(ReportCreatorFactory);
+        container.bind<ReportConfirmFactory>(Types.factory.confirmReport).to(ReportConfirmFactory);
         container.bind<Express>(Types.webserver).toService(types.webserver);
         container.bind<ReportListener>(Types.listener.report).to(ReportListener);
     }
@@ -43,6 +46,7 @@ export default class ReportPlugin extends AbstractPlugin {
     }
 
     private reportConversations: { [key: string]: ReportCreator } = {};
+    private confirmMessages: { [key: string]: ConfirmCreator }    = {};
 
     @inject(Types.api.client)
     private api: AxiosInstance;
@@ -53,12 +57,36 @@ export default class ReportPlugin extends AbstractPlugin {
     @inject(Types.factory.interactiveReport)
     private reportCreatorFactory: ReportCreatorFactory;
 
+    @inject(Types.factory.confirmReport)
+    private reportConfirmFactory: ReportConfirmFactory;
+
     public async initialize(): Promise<void> {
         this.client.once(
             'ready',
             () => this.reportListener.initialize().then(() => this.logger.info('Webhook Listener Initialized')),
         );
     }
+
+    @Decorator.Command('report confirm', 'Confirms a report')
+    @Decorator.Alias('confirm', 'Confirms a report')
+    public async ConfirmCommand(id: number): Promise<void> {
+        const channel = this.context.channel as TextChannel
+        
+        if (channel.guild.id !== ReportPlugin.Config.hotlineGuildId) {
+            return this.reply('This command currently only works in Hotline')
+        }
+
+        let report: interfaces.Report
+        try {
+            report = (await this.api.get<interfaces.Report>('/report/' + id)).data;
+        } catch (error) {     
+            console.log(error)
+            return this.reply('Unknown report')
+        }
+
+        this.confirmMessages[this.context.message.id] = this.reportConfirmFactory.create(report, this.context)
+    }
+
 
     @Decorator.Command('report get', 'Gets a report')
     @Decorator.Alias('show', 'show report')

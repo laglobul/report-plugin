@@ -5,6 +5,7 @@ const Types = {
     },
     factory:   {
         interactiveReport: Symbol('report.factory.interactiveReport'),
+        confirmReport: Symbol('report.confirm')
     },
     listener:  {
         report: Symbol('report.listener.report'),
