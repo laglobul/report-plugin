@@ -35,7 +35,7 @@
         ]
     },
     "peerDependencies": {
-        "@hotline/application-plugin": "^1.19.6",
+        "@hotline/application-plugin": "^1.26.0",
         "eris": "^0.9",
         "express": "^4.16",
         "eris-command-framework": "^2.3",
