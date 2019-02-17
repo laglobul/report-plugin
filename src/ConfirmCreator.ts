@@ -60,9 +60,8 @@ export default class ConfirmCreator {
       }
 
       const choiceNumber = emojiNumbers.indexOf(emoji.name)
+      const emojiId = emoji.id ? `${emoji.name}:${emoji.id}` : emoji.name
       if (choiceNumber === -1) {
-        const emojiId = emoji.id ? `${emoji.name}:${emoji.id}` : emoji.name
-
         await this.confirmMessage.removeReaction(emojiId, userId)
         return
       }
@@ -70,6 +69,7 @@ export default class ConfirmCreator {
       const chosenGuild = this.guilds[choiceNumber]
       const member = this.context.guild.members.get(userId)
       if (!member.roles.includes(chosenGuild.roleId) || !chosenGuild) {
+        await this.confirmMessage.removeReaction(emojiId, userId)
         return
       }
 
