@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/DiscordHotline/report-plugin/compare/v1.5.0...v1.6.0) (2019-02-18)
+
+
+### Features
+
+* **reportConfirm:** Added button/link to confirm message that goes to report ([61c392a](https://github.com/DiscordHotline/report-plugin/commit/61c392a))
+
 # [1.5.0](https://github.com/DiscordHotline/report-plugin/compare/v1.4.1...v1.5.0) (2019-02-17)
 
 
