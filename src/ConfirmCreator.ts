@@ -5,14 +5,17 @@ import { Repository, Connection } from "typeorm";
 import Guild from "@hotline/application-plugin/Entity/Guild";
 import { injectable } from "inversify";
 import { AxiosInstance } from "axios";
+import ReportMessage from "./Entity/ReportMessage";
+import ReportPlugin from "./index";
 
 const emojiNumbers = ['1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣', '9⃣']
 
 @injectable()
 export default class ConfirmCreator {
-  private confirmMessage: Message
-  private guilds        : Guild[]
-  private guildRepo     : Repository<Guild>
+  private confirmMessage   : Message
+  private guilds           : Guild[]
+  private guildRepo        : Repository<Guild>
+  private reportMessageRepo: Repository<ReportMessage>
 
   constructor(
     public  report    : Report,
@@ -24,7 +27,8 @@ export default class ConfirmCreator {
     // Temporary workaround because TypeORM™
     const guildEntity = this.connection.entityMetadatas.find(entity => entity.name === 'Guild').target
 
-    this.guildRepo = this.connection.getRepository(guildEntity)
+    this.guildRepo         = this.connection.getRepository(guildEntity)
+    this.reportMessageRepo = this.connection.getRepository(ReportMessage)
     this.initialize()
   }
 
@@ -54,7 +58,7 @@ export default class ConfirmCreator {
   }
 
   private listenForReactions() {
-    this.client.on('messageReactionAdd', async (message, emoji, userId) => {
+    this.client.on('messageReactionAdd', async (message: Message, emoji: any, userId: string) => {
       if (message.id !== this.confirmMessage.id || userId === this.client.user.id) {
         return
       }
@@ -127,6 +131,17 @@ export default class ConfirmCreator {
 
     if (this.guilds[9]) {
       embed.description += '\n_Support for showing more than 9 guilds will be added in the future_'
+    }
+
+    const hotlineId = ReportPlugin.Config.hotlineGuildId
+    const reportMessage = await this.reportMessageRepo.findOne({
+      reportId: this.report.id,
+      guildId: hotlineId
+    })
+
+    if (reportMessage) {
+      const {channelId, messageId} = reportMessage
+      embed.description += `\n\n[**View Report**](https://discordapp.com/channels/${hotlineId}/${channelId}/${messageId})`
     }
 
     return this.confirmMessage.edit({
