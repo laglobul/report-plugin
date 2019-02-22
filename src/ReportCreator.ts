@@ -206,8 +206,8 @@ export default class ReportCreator extends EventEmitter {
         
 Examples:
 
-- \`1a\`
-- \`2b, 3a, 4a\`
+\`1a\`
+\`2b, 3a, 4a\`
 
 `;
         embed.fields      = [];
@@ -233,19 +233,21 @@ Examples:
     }
 
     private async setReportReason(emitter: EventEmitter, message: Message): Promise<void> {
+        const content = message.content.replace(/^-/, '');
+        
         const regex      = /(\d+[a-z])/g;
         const firstRegex = /^(\d+[a-z])/;
-        if (!firstRegex.test(message.content)) {
+        if (!firstRegex.test(content)) {
             if (message.content.length <= 5) {
                 await this.dm.createMessage('That message is too short. Please specify a longer reason.');
 
                 return;
             }
 
-            this.report.reason = message.content;
+            this.report.reason = content;
         } else {
             const alphabet               = 'abcdefghijklmnopqrstuvwxyz';
-            const matches                = message.content.match(regex);
+            const matches                = content.match(regex);
             const tags: interfaces.Tag[] = [];
             for (const match of matches) {
                 const category = this.categories.find((x) => x.id === parseInt(match.match(/\d+/)[0], 10));
