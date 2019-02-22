@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/DiscordHotline/report-plugin/compare/v1.6.0...v1.6.1) (2019-02-22)
+
+
+### Bug Fixes
+
+* **ReportCreator:** Stripping dash from report reason/tags ([2f0d8d5](https://github.com/DiscordHotline/report-plugin/commit/2f0d8d5))
+
 # [1.6.0](https://github.com/DiscordHotline/report-plugin/compare/v1.5.0...v1.6.0) (2019-02-18)
 
 
