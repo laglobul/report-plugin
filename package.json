@@ -35,6 +35,7 @@
         ]
     },
     "peerDependencies": {
+        "highlight.js": "9.14.2",
         "@hotline/application-plugin": "^1.26.0",
         "eris": "^0.9",
         "express": "^4.16",
