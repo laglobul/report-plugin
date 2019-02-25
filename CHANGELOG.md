@@ -1,3 +1,16 @@
+# [1.7.0](https://github.com/DiscordHotline/report-plugin/compare/v1.6.1...v1.7.0) (2019-02-25)
+
+
+### Bug Fixes
+
+* **dependencies:** Highlight.js pls ([ff5d67e](https://github.com/DiscordHotline/report-plugin/commit/ff5d67e))
+* **style:** Fixing lint issues ([7e87793](https://github.com/DiscordHotline/report-plugin/commit/7e87793))
+
+
+### Features
+
+* **reportCreate:** added acknowledgement reaction ([0eb3799](https://github.com/DiscordHotline/report-plugin/commit/0eb3799))
+
 ## [1.6.1](https://github.com/DiscordHotline/report-plugin/compare/v1.6.0...v1.6.1) (2019-02-22)
 
 
