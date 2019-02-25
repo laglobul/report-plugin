@@ -8,16 +8,16 @@ import Permission from 'eris-command-framework/Util/Permission';
 import {Express} from 'express';
 import {Container, inject, injectable} from 'inversify';
 
+import ConfirmCreator from './ConfirmCreator';
 import ReportMessage from './Entity/ReportMessage';
 import Subscription from './Entity/Subscription';
 import * as interfaces from './interfaces';
 import ReportListener from './Listener/ReportListener';
 import Report from './Model/Report';
+import ReportConfirmFactory from './ReportConfirmFactory';
 import ReportCreator from './ReportCreator';
 import ReportCreatorFactory from './ReportCreatorFactory';
 import Types from './types';
-import ConfirmCreator from './ConfirmCreator';
-import ReportConfirmFactory from './ReportConfirmFactory';
 
 @injectable()
 export default class ReportPlugin extends AbstractPlugin {
@@ -46,6 +46,7 @@ export default class ReportPlugin extends AbstractPlugin {
     }
 
     private reportConversations: { [key: string]: ReportCreator } = {};
+
     private confirmMessages: { [key: string]: ConfirmCreator }    = {};
 
     @inject(Types.api.client)
@@ -70,23 +71,23 @@ export default class ReportPlugin extends AbstractPlugin {
     @Decorator.Command('report confirm', 'Confirms a report')
     @Decorator.Alias('confirm', 'Confirms a report')
     public async ConfirmCommand(id: number): Promise<void> {
-        const channel = this.context.channel as TextChannel
-        
+        const channel = this.context.channel as TextChannel;
+
         if (channel.guild.id !== ReportPlugin.Config.hotlineGuildId) {
-            return this.reply('This command currently only works in Hotline')
+            return this.reply('This command currently only works in Hotline');
         }
 
-        let report: interfaces.Report
+        let report: interfaces.Report;
         try {
             report = (await this.api.get<interfaces.Report>('/report/' + id)).data;
-        } catch (error) {     
-            console.log(error)
-            return this.reply('Unknown report')
+        } catch (error) {
+            console.log(error);
+
+            return this.reply('Unknown report');
         }
 
-        this.confirmMessages[this.context.message.id] = this.reportConfirmFactory.create(report, this.context)
+        this.confirmMessages[this.context.message.id] = this.reportConfirmFactory.create(report, this.context);
     }
-
 
     @Decorator.Command('report get', 'Gets a report')
     @Decorator.Alias('show', 'show report')
@@ -127,14 +128,14 @@ export default class ReportPlugin extends AbstractPlugin {
         let report: interfaces.Report;
         try {
             const reportRequest = await this.api.get<interfaces.Report>('/report/' + id);
-            report = reportRequest.data;
+            report              = reportRequest.data;
         } catch (e) {
             return this.reply('There was no report with that id.');
         }
 
         let ids = report.reportedUsers.map((x) => x.id);
         if (delimiter === 'mention') {
-            ids = ids.map((x) => '<@' + x + '>');
+            ids       = ids.map((x) => '<@' + x + '>');
             delimiter = null;
         }
 
@@ -287,16 +288,19 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
         onlyUsersInGuild = onlyUsersInGuild || 'true';
         tags             = tags || 'all';
 
-        const repo = this.database.getRepository<Guild>(Guild);
+        const repo    = this.database.getRepository<Guild>(Guild);
         const dbGuild = await repo.findOne({guildId: channel.guild.id});
         if (!dbGuild) {
+            // tslint:disable-next-line:max-line-length
             return this.reply('This channel belongs to a unknown guild. Double check to make sure that this guild belongs to Hotline and else contact the admins with the admin ping.');
-        } if (!dbGuild.owners.includes(this.context.member.id)) {
-            return this.reply('You are not listed as one of the owners/representatives for this guild. You can claim the guild with the claim command if you are a owner/representative of this guild.')
+        }
+        if (!dbGuild.owners.includes(this.context.member.id)) {
+            // tslint:disable-next-line:max-line-length
+            return this.reply('You are not listed as one of the owners/representatives for this guild. You can claim the guild with the claim command if you are a owner/representative of this guild.');
         }
 
-        const member = channel.guild.members.get(this.client.user.id);
-        const perms  = Permission.getEffectivePermission(member, channel);
+        const member        = channel.guild.members.get(this.client.user.id);
+        const perms         = Permission.getEffectivePermission(member, channel);
         const requiredPerms = 85056;
 
         // tslint:disable-next-line
@@ -357,7 +361,7 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
     public async CreateCommand(@Decorator.Remainder() content: string = null): Promise<void> {
         // TODO: Replacing this in the future with a better way of disabling features
         if (process.env.maintenance) {
-            return this.reply('Creating reports is currently not possible as maintenance mode is enabled.')
+            return this.reply('Creating reports is currently not possible as maintenance mode is enabled.');
         }
 
         const init: Partial<Report> = {};
@@ -388,7 +392,7 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
 
                 if (this.context.message.attachments.length > 0) {
                     const links = this.context.message.attachments.map((x) => x.url);
-                    init.links = init.links ? init.links.concat(...links) : links;
+                    init.links  = init.links ? init.links.concat(...links) : links;
                 }
 
                 if (/Reason:\s/.test(section)) {
