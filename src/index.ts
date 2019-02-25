@@ -410,6 +410,7 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
             );
         }
 
+        await this.context.message.addReaction('📫')
         this.reportConversations[this.context.user.id] = this.reportCreatorFactory.create(
             this.context,
             init,
