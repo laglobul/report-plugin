@@ -174,6 +174,9 @@ export default class ReportPlugin extends AbstractPlugin {
                 return message.edit(
                     `\`${field}\` is not a valid field. Pick from: ids, reason, tags, links, or guild`,
                 );
+            case 'reason':
+                body = {reason: value};
+                break;
             case 'ids':
                 const ids = value.toString().match(/(\d+)/g);
                 if (!ids) {
