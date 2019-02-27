@@ -1,3 +1,11 @@
+## [1.7.1](https://github.com/DiscordHotline/report-plugin/compare/v1.7.0...v1.7.1) (2019-02-27)
+
+
+### Bug Fixes
+
+* **Merge:** github.com:DiscordHotline/report-plugin ([6ea692d](https://github.com/DiscordHotline/report-plugin/commit/6ea692d))
+* **report edit:** Added reason ([0c0a0d0](https://github.com/DiscordHotline/report-plugin/commit/0c0a0d0))
+
 # [1.7.0](https://github.com/DiscordHotline/report-plugin/compare/v1.6.1...v1.7.0) (2019-02-25)
 
 
