@@ -1,3 +1,11 @@
+## [1.7.3](https://github.com/DiscordHotline/report-plugin/compare/v1.7.2...v1.7.3) (2019-03-10)
+
+
+### Bug Fixes
+
+* **reportEmbed:** Slicing instead of splicing ([1364eca](https://github.com/DiscordHotline/report-plugin/commit/1364eca))
+* **reportListener:** Slicing instead of splicing ([bf119b5](https://github.com/DiscordHotline/report-plugin/commit/bf119b5))
+
 ## [1.7.2](https://github.com/DiscordHotline/report-plugin/compare/v1.7.1...v1.7.2) (2019-03-10)
 
 
