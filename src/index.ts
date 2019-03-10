@@ -519,7 +519,7 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
         const embed = new Embed();
 
         embed.author      = {name: `Report ID: ${report.id}`};
-        embed.description = `**Users:** ${reportedUsers.splice(0, 10).join(', ')}
+        embed.description = `**Users:** ${reportedUsers.slice(0, 10).join(', ')}
         
 **Reason:** ${report.reason}
 
