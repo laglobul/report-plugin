@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/DiscordHotline/report-plugin/compare/v1.7.3...v1.8.0) (2019-03-10)
+
+
+### Features
+
+* **reportEmbed:** Improve the user ID limit message ([2220940](https://github.com/DiscordHotline/report-plugin/commit/2220940))
+
 ## [1.7.3](https://github.com/DiscordHotline/report-plugin/compare/v1.7.2...v1.7.3) (2019-03-10)
 
 
