@@ -1,3 +1,10 @@
+## [1.7.2](https://github.com/DiscordHotline/report-plugin/compare/v1.7.1...v1.7.2) (2019-03-10)
+
+
+### Bug Fixes
+
+* **edit:** Updating edit to toggle properly ([5e860b8](https://github.com/DiscordHotline/report-plugin/commit/5e860b8))
+
 ## [1.7.1](https://github.com/DiscordHotline/report-plugin/compare/v1.7.0...v1.7.1) (2019-02-27)
 
 
