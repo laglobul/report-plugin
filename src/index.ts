@@ -279,7 +279,7 @@ export default class ReportPlugin extends AbstractPlugin {
         'setup',
         'Set up reports to go to a channel the bot is in.',
         `Set up reports to go to a channel the bot is in.
-        
+
 onlyUsersInGuild should be \`true\` or \`yes\` (anything else is no). If set to no, will alert you to ALL reports.
 
 tags should be \`all\` or a list (comma or space delimited) list of tags from: {prefix}tags
@@ -519,8 +519,8 @@ tags should be \`all\` or a list (comma or space delimited) list of tags from: {
         const embed = new Embed();
 
         embed.author      = {name: `Report ID: ${report.id}`};
-        embed.description = `**Users:** ${reportedUsers.slice(0, 10).join(', ')}
-        
+        embed.description = `**Users:** ${reportedUsers.length > 10 ? `${reportedUsers.slice(0, 10).join(', ')} (limited to 10 out of ${reportedUsers.length})` : reportedUsers.slice(0, 10).join(', ')}
+
 **Reason:** ${report.reason}
 
 **Links:** ${links.length === 0 ? 'None' : links.join('\n')}
