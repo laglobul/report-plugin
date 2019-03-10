@@ -316,7 +316,13 @@ export default class ReportListener {
         const links         = report.links.map((x) => `<${x}>`);
         const tags          = report.tags.map((x) => x.name);
 
-        let description = `**Users:** \n${reportedUsers.slice(0, 10).join(', ')} (limited to 10)`;
+        let description = '**Users:**\n';
+        if (reportedUsers.length > 10) {
+            description += `${reportedUsers.slice(0, 10).join(', ')} (limited to 10 out of ${reportedUsers.length})`;
+        } else {
+            description += reportedUsers.join(', ');
+        }
+
         if (report.reason) {
             description += `\n\n**Reason:** ${report.reason}`;
         }
