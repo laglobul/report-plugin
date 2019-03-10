@@ -184,8 +184,9 @@ export default class ReportPlugin extends AbstractPlugin {
                 }
 
                 const users: string[] = report.reportedUsers.map((x) => x.id);
-                ids.forEach((x, index) => {
-                    if (users.includes(x)) {
+                ids.forEach((x) => {
+                    const index = users.indexOf(x);
+                    if (index >= 0) {
                         users.splice(index, 1);
                     } else {
                         users.push(x);
@@ -207,8 +208,9 @@ export default class ReportPlugin extends AbstractPlugin {
                 }
 
                 const newTags: number[] = report.tags.map((x) => x.id);
-                tags.forEach((x, index) => {
-                    if (newTags.includes(x)) {
+                tags.forEach((x) => {
+                    const index = newTags.indexOf(x);
+                    if (index >= 0) {
                         newTags.splice(index, 1);
                     } else {
                         newTags.push(x);
@@ -224,8 +226,9 @@ export default class ReportPlugin extends AbstractPlugin {
                 }
 
                 const newLinks: string[] = report.links;
-                links.forEach((x, index) => {
-                    if (newLinks.includes(x)) {
+                links.forEach((x) => {
+                    const index = newLinks.indexOf(x);
+                    if (index >= 0) {
                         newLinks.splice(index, 1);
                     } else {
                         newLinks.push(x);
