@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/DiscordHotline/report-plugin/compare/v1.8.1...v1.8.2) (2019-03-15)
+
+
+### Bug Fixes
+
+* **ReportListener:** Better Error Message ([f34d05d](https://github.com/DiscordHotline/report-plugin/commit/f34d05d))
+
 ## [1.8.1](https://github.com/DiscordHotline/report-plugin/compare/v1.8.0...v1.8.1) (2019-03-15)
 
 
