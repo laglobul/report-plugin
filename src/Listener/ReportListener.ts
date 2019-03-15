@@ -287,20 +287,24 @@ export default class ReportListener {
          * Create a new reportMessage if there isn't one. This should usually happen here. Will only not happen if the
          * edit fires before a message is created
          */
-        message = await channel.createMessage({embed: embed.serialize()});
-        this.addReactions(message);
-        if (!reportMessage) {
-            reportMessage            = new ReportMessage();
-            reportMessage.reportId   = report.id;
-            reportMessage.guildId    = guild.id;
-            reportMessage.channelId  = channel.id;
-            reportMessage.insertDate = new Date();
+        try {
+            message = await channel.createMessage({embed: embed.serialize()});
+            this.addReactions(message);
+            if (!reportMessage) {
+                reportMessage            = new ReportMessage();
+                reportMessage.reportId   = report.id;
+                reportMessage.guildId    = guild.id;
+                reportMessage.channelId  = channel.id;
+                reportMessage.insertDate = new Date();
+            }
+
+            reportMessage.messageId  = message.id;
+            reportMessage.updateDate = new Date();
+
+            await reportMessage.save();
+        } catch (e) {
+            console.error("Failed to create message: " + e.message);   
         }
-
-        reportMessage.messageId  = message.id;
-        reportMessage.updateDate = new Date();
-
-        await reportMessage.save();
 
         return;
     }
