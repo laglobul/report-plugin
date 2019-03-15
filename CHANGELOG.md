@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/DiscordHotline/report-plugin/compare/v1.8.0...v1.8.1) (2019-03-15)
+
+
+### Bug Fixes
+
+* **ReportListener:** Catching error ([49ef645](https://github.com/DiscordHotline/report-plugin/commit/49ef645))
+
 # [1.8.0](https://github.com/DiscordHotline/report-plugin/compare/v1.7.3...v1.8.0) (2019-03-10)
 
 
