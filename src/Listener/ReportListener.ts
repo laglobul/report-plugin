@@ -233,10 +233,16 @@ export default class ReportListener {
                 reportMessage.updateDate = new Date();
                 await reportMessage.save();
             } else {
-                message = await channel.createMessage({embed: embed.serialize()});
-                this.addReactions(message);
-                reportMessage.messageId = message.id;
-                await reportMessage.save();
+                try {
+                    message = await channel.createMessage({embed: embed.serialize()});
+                    this.addReactions(message);
+                    reportMessage.messageId = message.id;
+                    await reportMessage.save();
+                } catch (e) {
+                    console.error("Failed to create message: " + JSON.stringify({error: e.message, guild: guild.id, channel: channel.id, report: report.id}));
+
+                    return;
+                }
             }
 
             return;
