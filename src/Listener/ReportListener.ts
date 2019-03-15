@@ -303,7 +303,7 @@ export default class ReportListener {
 
             await reportMessage.save();
         } catch (e) {
-            console.error("Failed to create message: " + e.message);   
+            console.error("Failed to create message: " + JSON.stringify({error: e.message, guild: guild.id, channel: channel.id, report: report.id}));   
         }
 
         return;
