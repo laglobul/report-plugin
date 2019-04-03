@@ -94,14 +94,14 @@ export default class ConfirmCreator {
         confirmed: true
       })
 
-      return textChannel.createMessage(`${userMention} you have now confirmed report ${this.report.id} on behalf of <@&${guild.roleId}>.`)
+      return textChannel.createMessage(`${userMention} vous avez maintenant confirmé le rapport ${this.report.id} au nom de <@&${guild.roleId}>.`)
     } catch (e) {
-      if (e.response && e.response.data && e.response.data.message === 'report already confirmed') {
-        return textChannel.createMessage(`${userMention} this server has already confirmed report ${this.report.id}.`)
+      if (e.response && e.response.data && e.response.data.message === 'repport déjà confirmé') {
+        return textChannel.createMessage(`${userMention} ce serveur a déjà confirmé le rapport ${this.report.id}.`)
       }
 
       console.error(e)
-      return textChannel.createMessage(`${userMention} An unknown error has occured. If this still occurs after a while, notify an Hotline admin.`)
+      return textChannel.createMessage(`${userMention} Une erreur inconnue s'est produite. Si cela se produit encore après un certain temps, avertissez un administrateur de la hotline.`)
     
     }
   }
@@ -110,10 +110,10 @@ export default class ConfirmCreator {
     const issuer = this.context.user
     let embed: EmbedBase = {
       color      : 3447003,
-      title      : `Confirm report ${this.report.id}`,
-      description: 'On behalf of which server do you want to confirm this report?\n\n',
+      title      : `Confirmer le rapport ${this.report.id}`,
+      description: 'Au nom de quel serveur voulez-vous confirmer ce rapport ?\n\n',
       footer: {
-        text    : `Command issued by ${issuer.username}#${issuer.discriminator}`,
+        text    : `Commande effectuée par ${issuer.username}#${issuer.discriminator}`,
         icon_url: issuer.avatarURL
       }
     }
@@ -141,7 +141,7 @@ export default class ConfirmCreator {
 
     if (reportMessage) {
       const {channelId, messageId} = reportMessage
-      embed.description += `\n\n[**View Report**](https://discordapp.com/channels/${hotlineId}/${channelId}/${messageId})`
+      embed.description += `\n\n[**Voir le repport**](https://discordapp.com/channels/${hotlineId}/${channelId}/${messageId})`
     }
 
     return this.confirmMessage.edit({
